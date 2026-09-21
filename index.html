@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+ <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+ <meta name="description" content="Human guidance and residual learning for robotic box insertion. Dataset collection, base policy, corrections, training and evaluation.">
+ <title>Learning from Human Corrections | Seunghwan Um</title>
+ <link rel="icon" href="static/images/favicon.svg" type="image/svg+xml">
+ <link rel="preconnect" href="https://fonts.googleapis.com">
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css?family=Google+Sans:400,600%7CNoto+Sans:400,600,700&amp;display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="static/css/style.css?v=11"><script defer src="static/js/main.js?v=11"></script>
+ <script defer src="static/data/rollout.js"></script><script defer src="static/js/rollout.js"></script>
+ <script defer src="static/js/concept-sync.js?v=11"></script>
+ <script defer src="static/js/viewport-playback.js?v=11"></script>
+</head>
+<body>
+ <a class="skip" href="#dataset">Skip to videos</a>
+ <div class="playback-mode" hidden><button id="scroll-autoplay" type="button" aria-pressed="true">Scroll autoplay · On</button><span id="playback-notice" role="status" hidden></span></div>
+ <header class="hero wrap">
+  <h1>Learning from Human Corrections</h1>
+  <p class="byline"><a href="https://r-ush.github.io/" target="_blank" rel="noopener noreferrer">Seunghwan Um</a></p>
+  <p class="affiliation">Sungkyunkwan University</p>
+  <p class="advisor" id="advisor-credit">Advisor: <a href="https://scholar.google.com/citations?user=EDrjHWsAAAAJ&amp;hl=ko" target="_blank" rel="noopener noreferrer">Prof. Hyouk Ryeol Choi</a></p>
+ </header>
+ <main class="wrap">
+  <section id="dataset">
+   <div class="heading"><h2><span>01</span> Dataset collection</h2></div>
+   <video id="dataset-video" controls playsinline muted loop preload="metadata" poster="static/images/dataset_collection.jpg" aria-label="Dataset collection demonstrations"><source src="static/videos/dataset_collection.mp4" type="video/mp4"></video>
+   <p class="dataset-note">Even for a human operator, repeating the same insertion consistently is difficult, making demonstration collection challenging.</p>
+  </section>
+  <section id="base">
+   <div class="heading"><h2><span>02</span> Base policy</h2><p>It can insert the box. Contact can still stop it.</p></div>
+   <div class="training-context"><span class="context-label">BASE-POLICY TRAINING</span><p><strong>Absolute-action demonstrations.</strong> Collected at the <strong>Original position only.</strong></p></div>
+   <div class="rollout-explorer" id="rollout-explorer">
+    <div class="rollout-row">
+     <figure><div class="rollout-media"><video id="rollout-wrist" data-play-group="base-rollout" playsinline muted preload="metadata" poster="static/images/base_wrist.jpg" aria-label="Wrist camera observations from the same base-policy rollout"><source src="static/videos/base_wrist.mp4" type="video/mp4"></video></div><figcaption>Wrist camera <span>Same rollout · recorded RGB</span></figcaption></figure>
+     <figure><div class="rollout-media"><video id="base-insertion" data-play-group="base-rollout" controls playsinline muted preload="metadata" poster="static/images/base_success.jpg" aria-label="Base policy insertion, approach at 3 times speed then source speed at insertion"><source src="static/videos/base_success.mp4" type="video/mp4"></video></div><figcaption>Insertion <span class="speed-label" id="speed-label">3× approach → 1× insertion</span></figcaption></figure>
+     <figure><canvas id="rollout-trajectory" width="640" height="640" aria-label="Measured robot end-effector path and base targets from the same rollout, viewed using the external-video projection"></canvas><figcaption>Robot trajectory <span>Video-derived view</span></figcaption></figure>
+    </div>
+    <div class="rollout-legend"><span class="trajectory-pose">Measured EE path</span><span class="trajectory-base">Base target</span></div>
+    <div class="dataset-controls"><button id="rollout-play" type="button">Play rollout</button><label class="sr-only" for="rollout-progress">Synchronized rollout timeline</label><input id="rollout-progress" type="range" min="0" max="360" step="1" value="0"><output id="rollout-time" for="rollout-progress">0.0 / 15.0 s</output><button id="rollout-replay" type="button">Replay</button></div>
+    <p class="sync-note" id="rollout-sample">Same rollout · ep03 · timestamp-aligned</p>
+    <details class="dataset-details"><summary>Synchronization details</summary><p>All three views use ep_00003. The original video-to-log offset is +109.864 s, followed by the same 3× approach / 1× insertion edit. Wrist RGB and trajectory use the same nearest logged sample; maximum sampling mismatch is 64 ms, plus source-video frame quantization. The path shows the logged end-effector position, not an estimated fingertip. Its viewing direction comes from the original video projection matrix.</p></details>
+   </div>
+   <div class="contact-example">
+    <figure class="failure-figure"><div class="failure-frame"><video id="contact-problem" controls playsinline muted loop preload="none" poster="static/images/base_contact.jpg" aria-label="Base-policy contact failure highlighted by a red outer border"><source src="static/videos/base_contact.mp4" type="video/mp4"></video></div><figcaption>Contact problem</figcaption></figure>
+   </div>
+  </section>
+  <section id="training">
+   <div class="heading"><h2><span>03</span> Residual policy</h2><p>Correct alignment before insertion.</p></div>
+   <div class="residual-pair concept-triptych">
+    <figure><video id="concept-failure" data-play-group="residual-concept" controls playsinline muted preload="metadata" poster="static/images/concept_failure.jpg" aria-label="Concept animation of base-only contact failure"><source src="static/videos/concept_failure_sync.mp4" type="video/mp4"></video><figcaption>Contact failure <span class="concept-caption">Base only · concept illustration</span></figcaption></figure>
+    <figure class="paper-figure network-figure">
+     <a href="static/images/residual-network-compact.svg" target="_blank" rel="noopener"><img src="static/images/residual-network-compact.svg" alt="Observations feed a frozen base policy and a residual policy trained on human corrections; their actions are added into the executed action." loading="lazy" width="620" height="670"></a>
+     <figcaption>Residual policy<br><a href="https://arxiv.org/abs/2506.16685" target="_blank" rel="noopener noreferrer">Related paper: CR-DAgger ↗</a></figcaption>
+    </figure>
+    <figure><video id="concept-correction" data-play-group="residual-concept" controls playsinline muted loop preload="metadata" poster="static/images/concept_correction.jpg" aria-label="Concept animation of the residual correction before insertion"><source src="static/videos/concept_correction_sync.mp4" type="video/mp4"></video><figcaption>Residual correction <span class="concept-caption">Base + residual · concept illustration</span></figcaption></figure>
+   </div>
+   <div class="concept-controls dataset-controls" id="concept-controls" hidden><button id="concept-play" type="button">Play both</button><label class="sr-only" for="concept-progress">Shared concept animation timeline</label><input id="concept-progress" type="range" min="0" max="240" step="1" value="0"><output id="concept-time" for="concept-progress">0.0 / 8.0 s</output><button id="concept-replay" type="button">Replay both</button></div>
+  </section>
+  <section id="guidance">
+   <div class="heading"><h2><span>04</span> Human guidance</h2><p class="legend cyan"><i></i> Cyan: human correction vector</p></div>
+   <video id="guidance-video" class="guidance-video" controls playsinline muted loop preload="none" poster="static/images/human_guidance_raw.jpg" aria-label="Human physically guiding the robot with the original cyan correction-vector annotation"><source src="static/videos/human_guidance_raw.mp4" type="video/mp4"></video>
+  </section>
+  <section id="evaluation">
+   <div class="heading"><h2><span>05</span> Evaluation</h2><p class="legend"><i></i> Orange: residual correction toward −x</p></div>
+   <div class="training-context shifted-context"><span class="context-label">BACK −3 CM · OUTSIDE THE BASE TRAINING SET</span><p>The base policy learned absolute actions at the Original position only.<br><strong>With the target shifted back by 3 cm, the base policy alone fails.</strong></p></div>
+   <div class="pair evaluation-pair">
+    <figure><div class="condition-note"><strong>Original</strong><span>Training position · 0 cm</span></div><video id="eval-original" controls playsinline muted loop preload="metadata" poster="static/images/evaluation_original_raw.jpg" aria-label="Original position, orange residual correction, full crate visible"><source src="static/videos/evaluation_original_raw.mp4" type="video/mp4"></video><div class="clip-controls" data-media="eval-original" data-name="Original" hidden><button type="button" aria-label="Play Original video">Play</button><input type="range" min="0" max="1000" step="1" value="0" aria-label="Original video timeline"><output>0.0 / 15.0 s</output></div><figcaption>Base + residual · Original position</figcaption></figure>
+    <figure><div class="condition-note shifted"><strong>Back</strong><span>Unseen target shift: −3 cm</span></div><div class="shift-video">
+     <video id="eval-back" controls playsinline muted loop preload="metadata" poster="static/images/evaluation_back_raw.jpg" aria-label="Target shifted backward by 3 cm, with a fixed tape reference and the Original corner marked"><source src="static/videos/evaluation_back_raw.mp4" type="video/mp4"></video>
+     <svg class="shift-overlay" viewBox="0 0 1280 936" role="img" aria-labelledby="shift-title shift-desc">
+      <title id="shift-title">Box displacement relative to fixed black tape</title><desc id="shift-desc">The tape stays fixed. A dashed circle marks the Original box corner; a blue arrow points toward the Back corner. Minus 3 centimeters is the stated experiment condition, not a distance measured from these pixels.</desc>
+      <defs><marker id="shift-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#087aa5"/></marker></defs>
+      <g stroke-linecap="round" stroke-linejoin="round">
+       <path d="M319 835L427 863L524 921" fill="none" stroke="white" stroke-width="9"/>
+       <path d="M319 835L427 863L524 921" fill="none" stroke="#087aa5" stroke-width="3"/>
+       <circle cx="524" cy="921" r="12" fill="none" stroke="white" stroke-width="8"/><circle cx="524" cy="921" r="12" fill="none" stroke="#087aa5" stroke-width="3"/>
+       <circle cx="571" cy="921" r="12" fill="none" stroke="white" stroke-width="8"/><circle cx="571" cy="921" r="12" fill="none" stroke="#555" stroke-width="3" stroke-dasharray="5 5"/>
+       <path d="M573 919L590 907" stroke="white" stroke-width="10"/><path d="M573 919L590 907" stroke="#087aa5" stroke-width="4" marker-end="url(#shift-arrow)"/>
+       <path d="M949 824L750 860L604 903" fill="none" stroke="white" stroke-width="9"/><path d="M949 824L750 860L604 903" fill="none" stroke="#087aa5" stroke-width="3"/>
+       <circle cx="590" cy="907" r="5" fill="#087aa5" stroke="white" stroke-width="3"/>
+      </g>
+      <g font-family="Arial,sans-serif" font-size="34" font-weight="600">
+       <rect x="74" y="795" width="250" height="68" rx="9" fill="white" fill-opacity=".93"/><text x="98" y="840" fill="#126a8a">Fixed tape</text>
+       <rect x="925" y="784" width="295" height="80" rx="9" fill="white" fill-opacity=".93"/><text x="949" y="836" fill="#126a8a">Back −3 cm</text>
+      </g>
+     </svg>
+    </div><div class="clip-controls" data-media="eval-back" data-name="Back" hidden><button type="button" aria-label="Play Back video">Play</button><input type="range" min="0" max="1000" step="1" value="0" aria-label="Back video timeline"><output>0.0 / 15.0 s</output></div><figcaption>Base + residual · No base-training demos at this offset</figcaption><p class="shift-caption">Dashed: Original corner · Blue: shifted position</p></figure>
+   </div>
+   <div class="eval-controls"><button id="play-both" type="button">Play both</button><button id="replay-both" type="button">Replay</button><span>Separate autonomous rollouts</span></div>
+   <p class="sync-note">Position cues are visual references; −3 cm is the experiment setting.</p>
+  </section>
+ </main>
+ <footer class="wrap"><p>Selected clips · Collection and evaluation are separate sessions.</p><div><a href="https://compliant-residual-dagger.github.io/" target="_blank" rel="noopener noreferrer">Related work: CR-DAgger</a></div></footer>
+</body>
+</html>
