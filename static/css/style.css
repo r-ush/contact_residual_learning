@@ -38,7 +38,7 @@ h1 {
   font-size: 20px;
   line-height: 1.5;
 }
-.advisor { margin-top: 8px; font-size: 15px; color: #777; }
+.byline a { display: inline-block; }
 .download {
   display: inline-flex;
   gap: 13px;

@@ -4,9 +4,9 @@ A research demonstration website about human guidance and residual learning for 
 
 **Project page:** https://r-ush.github.io/contact_residual_learning/
 
-**Seunghwan Um** · Sungkyunkwan University
+**Seunghwan Um**, [Hyouk Ryeol Choi](https://scholar.google.com/citations?user=EDrjHWsAAAAJ&hl=ko) · Sungkyunkwan University
 
-Advisor: [Prof. Hyouk Ryeol Choi](https://scholar.google.com/citations?user=EDrjHWsAAAAJ&hl=ko)
+Dataset collection: thanks to [Tae Hyun Bae](https://github.com/bbaetae).
 
 ## On the page
 
