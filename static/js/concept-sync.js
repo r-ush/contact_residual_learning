@@ -1,18 +1,12 @@
 (() => {
  'use strict';
  const leader=document.getElementById('concept-correction'),follower=document.getElementById('concept-failure');
- const clips=[leader,follower],play=document.getElementById('concept-play');
- const slider=document.getElementById('concept-progress'),clock=document.getElementById('concept-time');
+ const clips=[leader,follower];
  const readyWaiters=new Set();
  let generation=0,loading=false,wantsPlaying=false,raf=0,pending=null;
  clips.forEach(v=>{v.controls=false;v.muted=true;});
  leader.loop=true;follower.loop=false;
- document.getElementById('concept-controls').hidden=false;
- function draw(){
-   const time=leader.currentTime||0;
-   slider.value=Math.round(time*30);clock.value=`${time.toFixed(1)} / 8.0 s`;
-   play.textContent=loading||!leader.paused?'Pause both':'Play both';
- }
+ // Viewport playback owns play/pause; the paired animations have no local controls.
  function sync(force=false){
    if(follower.readyState<1)return;
    follower.playbackRate=leader.playbackRate;
@@ -24,7 +18,7 @@
    if(wantsPlaying&&!leader.paused&&leader.readyState>=3&&leader.currentTime<8-.045&&follower.paused)follower.play().catch(()=>{});
  }
  function tick(){
-   sync();playFollower();draw();
+   sync();playFollower();
    if(!leader.paused)raf=requestAnimationFrame(tick);
  }
  function ready(v){
@@ -41,15 +35,15 @@
  function pause(){
    generation++;wantsPlaying=false;loading=false;
    [...readyWaiters].forEach(cancel=>cancel());
-   clips.forEach(v=>v.pause());cancelAnimationFrame(raf);sync(true);draw();
+   clips.forEach(v=>v.pause());cancelAnimationFrame(raf);sync(true);
  }
  function seek(time){
-   leader.currentTime=Math.max(0,Math.min(8,time));sync(true);draw();
+   leader.currentTime=Math.max(0,Math.min(8,time));sync(true);
  }
  function start(){
    if(loading)return pending;
    const request=++generation;
-   wantsPlaying=true;loading=true;draw();
+   wantsPlaying=true;loading=true;
    pending=(async()=>{
      try{
        // Both files must have a decoded first frame before starting the shared clock.
@@ -62,30 +56,23 @@
        if(request===generation)pause();
        throw error;
      }finally{
-       if(request===generation){loading=false;draw();}
+       if(request===generation)loading=false;
      }
    })();
    return pending;
  }
  leader.addEventListener('play',()=>{
    if(leader.paused)return;
-   wantsPlaying=true;sync(true);playFollower();cancelAnimationFrame(raf);raf=requestAnimationFrame(tick);draw();
+   wantsPlaying=true;sync(true);playFollower();cancelAnimationFrame(raf);raf=requestAnimationFrame(tick);
  });
  leader.addEventListener('pause',()=>{
    if(!leader.paused)return;
-   wantsPlaying=false;follower.pause();cancelAnimationFrame(raf);sync(true);draw();
+   wantsPlaying=false;follower.pause();cancelAnimationFrame(raf);sync(true);
  });
- leader.addEventListener('seeking',()=>{sync(true);draw();});
- leader.addEventListener('timeupdate',()=>{sync();draw();});
+ leader.addEventListener('seeking',()=>sync(true));
+ leader.addEventListener('timeupdate',()=>sync());
  leader.addEventListener('ratechange',()=>sync(true));
  leader.addEventListener('waiting',()=>follower.pause());
  leader.addEventListener('playing',()=>{sync();playFollower();});
- slider.addEventListener('input',()=>seek(Number(slider.value)/30));
- play.addEventListener('click',()=>{
-   if(loading||!leader.paused){leader.dispatchEvent(new Event('conceptmanualpause'));pause();}
-   else start().catch(()=>{});
- });
- document.getElementById('concept-replay').addEventListener('click',()=>{seek(0);start().catch(()=>{});});
  window.CONCEPT_PAIR={leader,follower,play:start,pause,seek,get loading(){return loading;}};
- draw();
 })();

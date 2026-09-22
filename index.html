@@ -8,9 +8,9 @@
  <link rel="preconnect" href="https://fonts.googleapis.com">
  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
  <link href="https://fonts.googleapis.com/css?family=Google+Sans:400,600%7CNoto+Sans:400,600,700&amp;display=swap" rel="stylesheet">
- <link rel="stylesheet" href="static/css/style.css?v=12"><script defer src="static/js/main.js?v=11"></script>
+ <link rel="stylesheet" href="static/css/style.css?v=13"><script defer src="static/js/main.js?v=11"></script>
  <script defer src="static/data/rollout.js"></script><script defer src="static/js/rollout.js"></script>
- <script defer src="static/js/concept-sync.js?v=11"></script>
+ <script defer src="static/js/concept-sync.js?v=13"></script>
  <script defer src="static/js/viewport-playback.js?v=11"></script>
 </head>
 <body>
@@ -25,7 +25,7 @@
   <section id="dataset">
    <div class="heading"><h2><span>01</span> Dataset collection</h2></div>
    <video id="dataset-video" controls playsinline muted loop preload="metadata" poster="static/images/dataset_collection.jpg" aria-label="Dataset collection demonstrations"><source src="static/videos/dataset_collection.mp4" type="video/mp4"></video>
-   <p class="dataset-note">Thanks to <a href="https://github.com/bbaetae" target="_blank" rel="noopener noreferrer">Tae Hyun Bae</a>.</p>
+   <p class="dataset-note">Even for a human operator, repeating the same insertion consistently is difficult, making demonstration collection challenging. Thanks to <a href="https://github.com/bbaetae" target="_blank" rel="noopener noreferrer">Tae Hyun Bae</a>.</p>
   </section>
   <section id="base">
    <div class="heading"><h2><span>02</span> Base policy</h2><p>It can insert the box. Contact can still stop it.</p></div>
@@ -48,14 +48,13 @@
   <section id="training">
    <div class="heading"><h2><span>03</span> Residual policy</h2><p>Correct alignment before insertion.</p></div>
    <div class="residual-pair concept-triptych">
-    <figure><video id="concept-failure" data-play-group="residual-concept" controls playsinline muted preload="metadata" poster="static/images/concept_failure.jpg" aria-label="Concept animation of base-only contact failure"><source src="static/videos/concept_failure_sync.mp4" type="video/mp4"></video><figcaption>Contact failure <span class="concept-caption">Base only · concept illustration</span></figcaption></figure>
+    <figure><video id="concept-failure" data-play-group="residual-concept" playsinline muted preload="metadata" poster="static/images/concept_failure.jpg" aria-label="Concept animation of base-only contact failure"><source src="static/videos/concept_failure_sync.mp4" type="video/mp4"></video><figcaption>Contact failure <span class="concept-caption">Base only · concept illustration</span></figcaption></figure>
     <figure class="paper-figure network-figure">
      <a href="static/images/residual-network-compact.svg" target="_blank" rel="noopener"><img src="static/images/residual-network-compact.svg" alt="Observations feed a frozen base policy and a residual policy trained on human corrections; their actions are added into the executed action." loading="lazy" width="620" height="670"></a>
      <figcaption>Residual policy<br><a href="https://arxiv.org/abs/2506.16685" target="_blank" rel="noopener noreferrer">Related paper: CR-DAgger ↗</a></figcaption>
     </figure>
-    <figure><video id="concept-correction" data-play-group="residual-concept" controls playsinline muted loop preload="metadata" poster="static/images/concept_correction.jpg" aria-label="Concept animation of the residual correction before insertion"><source src="static/videos/concept_correction_sync.mp4" type="video/mp4"></video><figcaption>Residual correction <span class="concept-caption">Base + residual · concept illustration</span></figcaption></figure>
+    <figure><video id="concept-correction" data-play-group="residual-concept" playsinline muted loop preload="metadata" poster="static/images/concept_correction.jpg" aria-label="Concept animation of the residual correction before insertion"><source src="static/videos/concept_correction_sync.mp4" type="video/mp4"></video><figcaption>Residual correction <span class="concept-caption">Base + residual · concept illustration</span></figcaption></figure>
    </div>
-   <div class="concept-controls dataset-controls" id="concept-controls" hidden><button id="concept-play" type="button">Play both</button><label class="sr-only" for="concept-progress">Shared concept animation timeline</label><input id="concept-progress" type="range" min="0" max="240" step="1" value="0"><output id="concept-time" for="concept-progress">0.0 / 8.0 s</output><button id="concept-replay" type="button">Replay both</button></div>
   </section>
   <section id="guidance">
    <div class="heading"><h2><span>04</span> Human guidance</h2><p class="legend cyan"><i></i> Cyan: human correction vector</p></div>

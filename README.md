@@ -12,7 +12,7 @@ Dataset collection: thanks to [Tae Hyun Bae](https://github.com/bbaetae).
 
 - Demonstration collection and base-policy contact failures.
 - Synchronized wrist-camera, insertion-video, and robot-trajectory views of the same rollout.
-- A compact residual-policy diagram and synchronized concept animations.
+- A compact residual-policy diagram and synchronized, auto-looping concept animations without a timeline or local playback buttons.
 - Human correction vectors and evaluation at Original and Back −3 cm positions.
 - Muted, viewport-aware video playback with manual playback controls.
 
